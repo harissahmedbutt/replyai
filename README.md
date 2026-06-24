@@ -169,13 +169,6 @@ cd frontend && npm install && npm run dev
 
 ---
 
-## Pricing (suggested)
-
-| Plan | Price | Includes |
-|------|-------|---------|
-| Free | $0 | 30 AI drafts/month |
-| Pro | $39/month | Unlimited drafts, persona builder, query interface |
-| Team | $99/month | 3 numbers, shared dashboard |
 
 ---
 
