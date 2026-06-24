@@ -1,0 +1,41 @@
+import 'dotenv/config'
+import express from 'express'
+import webhookRoutes from './routes/webhooks.js'
+import onboardingRoutes from './routes/onboarding.js'
+import importRoutes from './routes/imports.js'
+import settingsRoutes from './routes/settings.js'
+import contactRoutes from './routes/contacts.js'
+import messageRoutes from './routes/messages.js'
+import billingRoutes from './routes/billing.js'
+
+const app = express()
+const PORT = process.env.PORT || 4000
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// CORS for frontend
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.APP_URL || '*')
+  res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS')
+  if (req.method === 'OPTIONS') return res.sendStatus(200)
+  next()
+})
+
+// Stripe webhook needs raw body
+app.use('/billing/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  req.rawBody = req.body; next()
+})
+
+app.use('/webhooks', webhookRoutes)
+app.use('/onboarding', onboardingRoutes)
+app.use('/imports', importRoutes)
+app.use('/settings', settingsRoutes)
+app.use('/contacts', contactRoutes)
+app.use('/messages', messageRoutes)
+app.use('/billing', billingRoutes)
+
+app.get('/health', (_, res) => res.json({ status: 'ok' }))
+
+app.listen(PORT, () => console.log(`ReplyAI backend running on port ${PORT}`))
