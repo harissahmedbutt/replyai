@@ -36,6 +36,6 @@ app.use('/contacts', contactRoutes)
 app.use('/messages', messageRoutes)
 app.use('/billing', billingRoutes)
 
-app.get('/health', (_, res) => res.json({ status: 'ok' }))
+app.get('/health', (_, res) => res.json({ status: 'ok', version: process.env.RAILWAY_GIT_COMMIT_SHA || 'local' }))
 
 app.listen(PORT, () => console.log(`ReplyAI backend running on port ${PORT}`))
