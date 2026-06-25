@@ -18,7 +18,31 @@ router.post('/whatsapp', async (req, res) => {
   const body = Body.trim()
 
   try {
-    // Determine if this is an agent number or control number message
+    // Sandbox mode: single number acts as both agent and control
+    // Commands (ok/edit/skip/summarize etc) → control flow
+    // Everything else → agent flow (generate draft)
+    const SANDBOX_NUMBER = process.env.TWILIO_SANDBOX_NUMBER
+    const isSandbox = SANDBOX_NUMBER && (To === `whatsapp:${SANDBOX_NUMBER}` || To === SANDBOX_NUMBER)
+
+    if (isSandbox) {
+      // Find user by their personal WA number
+      const { data: user } = await db.supabase
+        .from('users').select('*').eq('personal_wa_number', fromNumber).single()
+      if (!user) {
+        console.log(`No user found for number ${fromNumber}`)
+        return
+      }
+      const waRecord = await db.getWaNumbers(user.id)
+      const isCommand = /^(ok|send|edit|skip|summarize|today|catch me up|auto|pause|resume|groups)/i.test(body)
+      if (isCommand) {
+        await handleControlMessage({ users: user, ...waRecord, control_number: To, agent_number: To }, fromNumber, body)
+      } else {
+        await handleAgentMessage({ users: user, agent_number: To, control_number: To }, fromNumber, body, MessageSid)
+      }
+      return
+    }
+
+    // Production: two-number architecture
     const [agentMatch, controlMatch] = await Promise.all([
       db.getUserByAgentNumber(To),
       db.getUserByControlNumber(To)
