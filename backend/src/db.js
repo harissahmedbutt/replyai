@@ -7,6 +7,8 @@ export const supabase = createClient(
 )
 
 export const db = {
+  supabase,
+
   // Users
   async getUserByEmail(email) {
     const { data } = await supabase.from('users').select('*').eq('email', email).single()
