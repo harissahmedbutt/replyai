@@ -18,6 +18,10 @@ export const db = {
     const { data } = await supabase.from('users').select('*').eq('id', id).single()
     return data
   },
+  async updateUser(id, updates) {
+    const { data } = await supabase.from('users').update(updates).eq('id', id).select().single()
+    return data
+  },
   async getUserByAgentNumber(number) {
     const { data } = await supabase
       .from('wa_numbers').select('*, users(*)').eq('agent_number', number).single()

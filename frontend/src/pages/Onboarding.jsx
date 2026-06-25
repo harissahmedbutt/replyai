@@ -1,19 +1,40 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../supabase.js'
 
-export default function Onboarding() {
+export default function Onboarding({ onProfileChange }) {
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(true)
   const [provisioning, setProvisioning] = useState(false)
   const [msg, setMsg] = useState(null)
+  const [number, setNumber] = useState('')
+  const [savingNumber, setSavingNumber] = useState(false)
 
-  useEffect(() => { api('/onboarding/status').then(setStatus).finally(() => setLoading(false)) }, [])
+  const loadStatus = () => api('/onboarding/status').then(setStatus)
+
+  useEffect(() => { loadStatus().finally(() => setLoading(false)) }, [])
+
+  const savePersonalNumber = async e => {
+    e.preventDefault()
+    setSavingNumber(true); setMsg(null)
+    try {
+      await api('/onboarding/personal-number', {
+        method: 'POST',
+        body: JSON.stringify({ number })
+      })
+      await loadStatus()
+      onProfileChange && onProfileChange()
+      setMsg({ type: 'green', text: '✅ WhatsApp number saved.' })
+    } catch (e) {
+      setMsg({ type: 'red', text: e.message })
+    }
+    setSavingNumber(false)
+  }
 
   const provision = async () => {
     setProvisioning(true); setMsg(null)
     try {
       const res = await api('/onboarding/provision', { method: 'POST' })
-      setStatus({ hasNumbers: true, hasPersona: status?.hasPersona, numbers: res.numbers })
+      setStatus({ ...status, hasNumbers: true, numbers: res.numbers })
       setMsg({ type: 'green', text: '✅ Numbers provisioned! Check your WhatsApp for a welcome message.' })
     } catch (e) {
       setMsg({ type: 'red', text: e.message })
@@ -26,13 +47,47 @@ export default function Onboarding() {
   return (
     <div>
       <div className="page-title">Setup</div>
-      <div className="page-sub">Get your WhatsApp agent live in 5 steps</div>
+      <div className="page-sub">Get your WhatsApp agent live</div>
 
       {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
 
-      {/* Step 1 */}
+      {/* Step 1 — Personal WhatsApp number */}
       <div className="card">
-        <div className="section-label">Step 1 — Get Your Numbers</div>
+        <div className="section-label">Step 1 — Your WhatsApp Number</div>
+        {status?.hasPersonalNumber ? (
+          <div>
+            <div style={{ color: 'var(--accent)', fontWeight: 600, marginBottom: 8 }}>✅ Number saved</div>
+            <div className="number-box">{status.personalNumber}</div>
+            <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: 8 }}>
+              This is where you'll receive draft notifications and reply <strong style={{ color: 'var(--text)' }}>ok / edit / skip</strong>.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={savePersonalNumber}>
+            <p style={{ color: 'var(--muted)', marginBottom: 12, fontSize: '0.9rem' }}>
+              Enter the WhatsApp number on your phone. This is where your agent sends you draft
+              notifications to approve. Use international format.
+            </p>
+            <div className="form-group">
+              <input
+                type="tel"
+                value={number}
+                onChange={e => setNumber(e.target.value)}
+                placeholder="+14155551234"
+                required
+                style={{ width: '100%' }}
+              />
+            </div>
+            <button type="submit" className="btn-primary" disabled={savingNumber} style={{ marginTop: 8 }}>
+              {savingNumber ? 'Saving...' : 'Save Number'}
+            </button>
+          </form>
+        )}
+      </div>
+
+      {/* Step 2 — Provision numbers */}
+      <div className="card">
+        <div className="section-label">Step 2 — Get Your Numbers</div>
         {status?.hasNumbers ? (
           <div>
             <div style={{ color: 'var(--accent)', fontWeight: 600, marginBottom: 12 }}>✅ Numbers active</div>
@@ -50,25 +105,28 @@ export default function Onboarding() {
             <p style={{ color: 'var(--muted)', marginBottom: 16, fontSize: '0.9rem' }}>
               We'll provision two WhatsApp Business numbers for you instantly — one for your contacts to message, one for your private control interface.
             </p>
-            <button className="btn-primary" onClick={provision} disabled={provisioning}>
+            <button className="btn-primary" onClick={provision} disabled={provisioning || !status?.hasPersonalNumber}>
               {provisioning ? 'Provisioning...' : '🚀 Provision My Numbers'}
             </button>
+            {!status?.hasPersonalNumber && (
+              <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: 8 }}>Save your WhatsApp number first.</p>
+            )}
           </div>
         )}
       </div>
 
-      {/* Step 2 */}
+      {/* Step 3 */}
       <div className="card">
-        <div className="section-label">Step 2 — Save Your Control Number</div>
+        <div className="section-label">Step 3 — Save Your Control Number</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
           Save your control number in your WhatsApp contacts as <strong style={{ color: 'var(--text)' }}>"ReplyAI"</strong>.
           This is where you'll approve/edit/skip drafts and ask questions like "summarize Sarah."
         </p>
       </div>
 
-      {/* Step 3 */}
+      {/* Step 4 */}
       <div className="card">
-        <div className="section-label">Step 3 — Upload Chat Exports</div>
+        <div className="section-label">Step 4 — Upload Chat Exports</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 12 }}>
           Export 3+ WhatsApp chats: <strong style={{ color: 'var(--text)' }}>Settings → Chats → Export Chat → Without Media</strong>.
           Upload the .txt files to build your persona and populate contact history.
@@ -78,9 +136,9 @@ export default function Onboarding() {
         </a>
       </div>
 
-      {/* Step 4 */}
+      {/* Step 5 */}
       <div className="card">
-        <div className="section-label">Step 4 — Share Your Agent Number</div>
+        <div className="section-label">Step 5 — Share Your Agent Number</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
           Share your agent number with your contacts. You can copy this message:
         </p>
@@ -91,9 +149,9 @@ export default function Onboarding() {
         )}
       </div>
 
-      {/* Step 5 */}
+      {/* Step 6 */}
       <div className="card">
-        <div className="section-label">Step 5 — You're Live</div>
+        <div className="section-label">Step 6 — You're Live</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
           When someone messages your agent number, you'll get a WhatsApp draft notification on your personal number.
           Reply <strong style={{ color: 'var(--text)' }}>ok</strong> to send, <strong style={{ color: 'var(--text)' }}>edit [your text]</strong> to change, or <strong style={{ color: 'var(--text)' }}>skip</strong> to dismiss.
