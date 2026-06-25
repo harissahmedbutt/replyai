@@ -159,7 +159,7 @@ async function handleSendCommand(user, waNumbers, contactName) {
     return sendControl(waNumbers.control_number, user.personal_wa_number, msg)
   }
 
-  const contact = await db.getOrCreateContact(user.id, draft.contact_id, draft.contacts.display_name)
+  const contact = await db.getContactById(draft.contact_id)
   await sendWhatsApp(contact.wa_id, waNumbers.agent_number, draft.draft_text)
   await db.saveMessage(user.id, contact.id, 'outbound', draft.draft_text, null)
   await db.updateDraftStatus(draft.id, 'sent')
@@ -173,7 +173,7 @@ async function handleEditCommand(user, waNumbers, newText, contactName) {
 
   if (!draft) return sendControl(waNumbers.control_number, user.personal_wa_number, 'No pending draft to edit.')
 
-  const contact = await db.getOrCreateContact(user.id, draft.contact_id, draft.contacts.display_name)
+  const contact = await db.getContactById(draft.contact_id)
   await sendWhatsApp(contact.wa_id, waNumbers.agent_number, newText)
   await db.saveMessage(user.id, contact.id, 'outbound', newText, null)
   await db.updateDraftStatus(draft.id, 'edited')
