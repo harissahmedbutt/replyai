@@ -45,3 +45,19 @@ export async function sendDraftNotification(controlNumber, userPersonalNumber, c
 export async function sendControl(controlNumber, userPersonalNumber, message) {
   return sendWhatsApp(userPersonalNumber, controlNumber, message)
 }
+
+// Hot-lead alert pushed to the agent's personal WhatsApp.
+export async function sendLeadAlert(controlNumber, userPersonalNumber, lead) {
+  const bits = []
+  if (lead.intent && lead.intent !== 'unknown') bits.push(lead.intent)
+  if (lead.bedrooms && lead.bedrooms !== 'unknown') bits.push(`${lead.bedrooms} BR`)
+  if (lead.areas && lead.areas.length) bits.push(lead.areas.join(', '))
+  if (lead.budget_max) bits.push(`≤ ${Math.round(lead.budget_max / 1000)}k AED`)
+  if (lead.timeline && lead.timeline !== 'unknown') bits.push(`timeline ${lead.timeline}`)
+  const summary = bits.length ? bits.join(' · ') : 'details still coming in'
+  const body =
+    `🔥 *Hot lead* — ${lead.display_name}\n` +
+    `${summary}\n\n` +
+    `They're qualified and ready. Jump in to close it.`
+  return sendWhatsApp(userPersonalNumber, controlNumber, body)
+}

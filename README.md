@@ -1,63 +1,65 @@
-# ReplyAI
+# ReplyAI — AI WhatsApp Lead Qualifier for Dubai Real Estate
 
-A WhatsApp Business SaaS agent that reads your incoming messages, drafts replies in your voice using Claude, and sends you the draft on WhatsApp for approval — all without leaving WhatsApp.
+An AI WhatsApp assistant for Dubai real-estate agents. It instantly **qualifies every property lead**, **auto-answers routine questions 24/7**, flags hot leads, and **escalates the judgment calls** (negotiation, viewing times) to the agent — so no lead goes cold while you're showing a property or asleep.
+
+In real estate, speed-to-lead wins the deal. ReplyAI replies in seconds, gathers budget / area / bedrooms / timeline, and hands you a qualified pipeline.
 
 ---
 
 ## How It Works
 
-1. Sign up → get two WhatsApp Business numbers provisioned instantly
-2. Upload your existing chat exports → AI learns your writing style
-3. Contact messages your agent number → Claude drafts a reply
-4. You get a WhatsApp notification on your personal number:
+1. Sign up → get a WhatsApp Business number provisioned instantly
+2. Set your **business profile** (agency name, areas served, working hours, tone)
+3. Put your agent number on your Bayut / Property Finder ads and listings
+4. A buyer or renter messages → the AI replies, qualifies, and captures the lead:
 
 ```
-📩 Sarah Chen
-"are we still on for Thursday?"
-
-Draft reply:
-"yeah! 7pm still works, see you then 👍"
-
-Reply ok · edit [text] · skip
+Lead:  "Hi, saw your 2-bed in Marina on Bayut — still available?"
+AI:    "Hi! Yes, still available 🙂 Are you looking to rent or buy,
+        and what's your budget range? Happy to share options."
+Lead:  "Rent, around 120k/yr, moving next month"
+AI →   captures: intent=rent · area=Dubai Marina · 2BR ·
+        budget≤120k AED · timeline=1-3m · score=HOT
+AI →   agent gets a hot-lead alert on WhatsApp
 ```
 
-5. Reply **ok** → message sent. Done.
-
-Everything stays in WhatsApp. No extra apps.
+5. Routine questions are answered automatically. Negotiation, viewing times, or anything
+   the AI is unsure about get **escalated to you to approve** — reply **ok / edit / skip**.
 
 ---
 
 ## Architecture
 
 ```
-Contact → Agent Number (Twilio)
-               ↓
+Lead → Agent Number (Twilio WhatsApp)
+              ↓
          Node.js Backend
-               ↓
-    Claude claude-opus-4-8 (draft)
-               ↓
-    Control Number → Your Personal WhatsApp
-               ↓
-         You reply "ok"
-               ↓
-    Agent Number sends reply to contact
+              ↓
+   Claude claude-opus-4-8 — qualify + reply + extract (structured output)
+              ↓
+    ┌─────────────────────────────┬──────────────────────────────┐
+    │ routine → auto-send to lead  │ negotiation/viewing/unsure → │
+    │                              │ escalate draft to the agent  │
+    └─────────────────────────────┴──────────────────────────────┘
+              ↓
+   Lead saved with stage + score → Pipeline dashboard + hot-lead alerts
 ```
 
-Each user gets two Twilio WhatsApp numbers:
-- **Agent number** — the public number your contacts message
-- **Control number** — your private assistant that sends drafts and takes commands
+A single Claude call per message returns the reply to send, the extracted lead fields
+(intent, budget, area, bedrooms, timeline, purpose), the pipeline stage + lead score, and
+the escalate/auto-answer decision.
 
 ---
 
 ## Features
 
-- **Draft + approve** — agent never sends without your sign-off (or enable auto-reply)
-- **Persona builder** — upload WhatsApp chat exports, Claude extracts your writing style
-- **Full contact context** — stores every message, auto-summarizes long histories
-- **Query interface** — ask "summarize Sarah", "who messaged me today?", "catch me up"
-- **WhatsApp commands** — control everything from your phone, no dashboard needed
-- **Per-contact settings** — mute specific contacts, enable auto-reply for others
-- **Web dashboard** — view history, manage contacts, edit persona, billing
+- **Instant lead qualification** — gathers intent, area, budget (AED), bedrooms, timeline, purpose over a natural conversation
+- **Auto-answer + escalate** — routine questions answered in seconds; negotiation and viewing confirmations routed to the agent
+- **Hot-lead alerts** — the agent is pinged on WhatsApp the moment a lead turns hot
+- **Lead pipeline** — every lead tracked through new → qualifying → qualified → viewing → negotiating, scored hot/warm/cold
+- **Pipeline queries** — ask "hot leads", "new leads", "leads in Marina", "follow ups", "summarize [name]" from WhatsApp
+- **Dubai-tuned** — AED budgets, lakh/crore-free phrasing, areas like Marina, JVC, JLT, Downtown, Business Bay
+- **Web dashboard** — pipeline view, lead detail with qualification + stage, business profile, settings
 
 ---
 
@@ -67,17 +69,17 @@ Send these to your control number from your personal WhatsApp:
 
 | Command | Action |
 |---------|--------|
-| `ok` | Send the latest pending draft |
-| `ok [name]` | Send draft for a specific contact |
-| `edit [your text]` | Replace draft and send your version |
+| `ok` | Send the latest escalated draft to the lead |
+| `ok [name]` | Send the draft for a specific lead |
+| `edit [your text]` | Replace the draft and send your version |
 | `skip` | Dismiss the latest draft |
-| `skip [name]` | Dismiss draft for a specific contact |
-| `summarize [name]` | Full relationship summary for a contact |
-| `today` | Who messaged you today + previews |
-| `catch me up` | All pending conversations |
-| `auto on / off` | Toggle auto-reply globally |
+| `hot leads` | List your hot leads |
+| `new leads` / `today` | Leads that came in today |
+| `leads in [area]` | Leads interested in an area (e.g. `leads in JVC`) |
+| `follow ups` | Leads still being qualified |
+| `summarize [name]` | Full summary of a lead and best next action |
+| `auto on / off` | Toggle approve-everything mode |
 | `pause / resume` | Stop or restart the agent |
-| `groups on / off` | Toggle group chat handling |
 
 ---
 
@@ -89,10 +91,10 @@ Send these to your control number from your personal WhatsApp:
 | Frontend | React + Vite |
 | Database | PostgreSQL (Supabase) |
 | WhatsApp | Twilio WhatsApp Business API |
-| AI | Claude `claude-opus-4-8` (Anthropic) |
-| Auth | Supabase Auth |
+| AI | Claude `claude-opus-4-8` (Anthropic), structured outputs |
+| Auth | Supabase Auth (email + Google SSO) |
 | Billing | Stripe |
-| Deployment | Railway |
+| Deployment | Railway (backend) + Vercel (frontend) |
 
 ---
 
@@ -102,16 +104,14 @@ Send these to your control number from your personal WhatsApp:
 - [Supabase](https://supabase.com) account
 - [Twilio](https://twilio.com) account with WhatsApp Business API access
 - [Anthropic](https://console.anthropic.com) API key
-- [Stripe](https://stripe.com) account
-- [Railway](https://railway.app) account
+- [Stripe](https://stripe.com) account (optional, for billing)
+- [Railway](https://railway.app) + [Vercel](https://vercel.com) accounts
 
 ### 1. Database
 
 Create a Supabase project and run `backend/schema.sql` in the SQL editor.
 
 ### 2. Environment Variables
-
-Copy and fill both env files:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -125,13 +125,9 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your-service-role-key
 TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_WEBHOOK_URL=https://your-backend.up.railway.app
+TWILIO_SANDBOX_NUMBER=+14155238886
 ANTHROPIC_API_KEY=sk-ant-your-key
-STRIPE_SECRET_KEY=sk_live_or_test_key
-STRIPE_WEBHOOK_SECRET=whsec_your-webhook-secret
-STRIPE_PRO_PRICE_ID=price_xxx
-STRIPE_TEAM_PRICE_ID=price_xxx
-APP_URL=https://your-frontend.up.railway.app
+APP_URL=https://your-frontend.vercel.app
 ```
 
 **frontend/.env**
@@ -151,24 +147,23 @@ cd backend && npm install && npm run dev
 cd frontend && npm install && npm run dev
 ```
 
-### 4. Deploy to Railway
+### 4. Deploy
 
-1. Push to GitHub
-2. Create two Railway services — one for `backend/`, one for `frontend/`
-3. Set env vars in Railway dashboard
-4. Point Twilio webhook URL to your Railway backend URL + `/webhooks/whatsapp`
+- **Backend → Railway**: connect the repo, set root directory to `backend`, add env vars
+- **Frontend → Vercel**: connect the repo, set root directory to `frontend`, add `VITE_*` env vars
+- Point the Twilio webhook URL to your Railway backend URL + `/webhooks/whatsapp`
 
-### 5. Onboard as a User
+### 5. Onboard as an Agent
 
 1. Sign up at your deployed frontend URL
-2. Go to **Setup** → click **Provision My Numbers**
-3. Save the control number as "ReplyAI" in your WhatsApp contacts
-4. Export 3+ WhatsApp chats (WhatsApp → Settings → Chats → Export Chat → Without Media) and upload them on the **Persona** page
-5. Share your agent number with your contacts
-6. First message arrives → approve it on WhatsApp → you're live
+2. Add your WhatsApp number, then provision your agent number on **Setup**
+3. Fill in your **Business Profile** (agency, areas served, hours, tone)
+4. Put your agent number on your Bayut / Property Finder ads
+5. A lead messages → the AI qualifies it → you watch the pipeline fill up
 
----
-
+> **Sandbox mode**: with the Twilio WhatsApp sandbox you have one shared number, so you
+> message it yourself to test (you play both the lead and the approving agent). Production
+> needs a provisioned WhatsApp Business number per agent.
 
 ---
 
@@ -180,32 +175,30 @@ replyai/
 │   ├── schema.sql              # Run this in Supabase SQL editor
 │   ├── src/
 │   │   ├── index.js            # Express entry point
-│   │   ├── db.js               # Supabase query layer
+│   │   ├── db.js               # Supabase query layer (leads + agency)
 │   │   ├── middleware/auth.js  # JWT verification
 │   │   ├── routes/
-│   │   │   ├── webhooks.js     # Twilio message handler (core logic)
-│   │   │   ├── onboarding.js   # Number provisioning
-│   │   │   ├── imports.js      # Chat export upload + persona build
-│   │   │   ├── contacts.js     # Contact CRUD + summaries
-│   │   │   ├── messages.js     # Draft send/dismiss
-│   │   │   ├── settings.js     # User settings
+│   │   │   ├── webhooks.js     # Twilio handler: qualify → auto-answer / escalate
+│   │   │   ├── onboarding.js   # Number provisioning + personal number capture
+│   │   │   ├── leads.js        # Lead pipeline list / detail / stage update
+│   │   │   ├── agency.js       # Business profile get / update
+│   │   │   ├── messages.js     # Draft send / dismiss
+│   │   │   ├── settings.js     # Agent settings
 │   │   │   └── billing.js      # Stripe checkout + webhooks
 │   │   └── services/
-│   │       ├── agent.js        # Claude draft generation + queries
-│   │       ├── persona.js      # Persona extraction from exports
-│   │       ├── parser.js       # WhatsApp .txt export parser
-│   │       ├── twilio.js       # WhatsApp send helpers
-│   │       └── queue.js        # Per-contact message debounce
+│   │       ├── agent.js        # Claude qualification brain (structured output)
+│   │       ├── twilio.js       # WhatsApp send helpers + lead alerts
+│   │       └── queue.js        # Per-lead message debounce
 └── frontend/
     └── src/
         ├── pages/
-        │   ├── Login.jsx
-        │   ├── Onboarding.jsx  # 5-step setup flow
-        │   ├── Dashboard.jsx   # Pending drafts + recent contacts
-        │   ├── Contacts.jsx    # Contact list + search
-        │   ├── Contact.jsx     # History, notes, AI summary
-        │   ├── Persona.jsx     # Export upload + persona editor
-        │   └── Settings.jsx    # Toggles + command reference
+        │   ├── Login.jsx        # Email + Google SSO
+        │   ├── Onboarding.jsx   # Setup flow
+        │   ├── Dashboard.jsx    # Pipeline: stages, hot leads, escalations
+        │   ├── Contacts.jsx     # Lead list with qualification data
+        │   ├── Contact.jsx      # Lead detail: thread + qualification + stage
+        │   ├── Persona.jsx      # Business profile
+        │   └── Settings.jsx     # Toggles + command reference
         └── components/
-            └── Layout.jsx      # Sidebar navigation
+            └── Layout.jsx       # Sidebar navigation
 ```

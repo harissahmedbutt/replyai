@@ -2,9 +2,9 @@ import 'dotenv/config'
 import express from 'express'
 import webhookRoutes from './routes/webhooks.js'
 import onboardingRoutes from './routes/onboarding.js'
-import importRoutes from './routes/imports.js'
 import settingsRoutes from './routes/settings.js'
-import contactRoutes from './routes/contacts.js'
+import leadRoutes from './routes/leads.js'
+import agencyRoutes from './routes/agency.js'
 import messageRoutes from './routes/messages.js'
 import billingRoutes from './routes/billing.js'
 
@@ -34,9 +34,9 @@ app.use('/billing/webhook', express.raw({ type: 'application/json' }), (req, res
 
 app.use('/webhooks', webhookRoutes)
 app.use('/onboarding', onboardingRoutes)
-app.use('/imports', importRoutes)
 app.use('/settings', settingsRoutes)
-app.use('/contacts', contactRoutes)
+app.use('/leads', leadRoutes)
+app.use('/agency', agencyRoutes)
 app.use('/messages', messageRoutes)
 app.use('/billing', billingRoutes)
 

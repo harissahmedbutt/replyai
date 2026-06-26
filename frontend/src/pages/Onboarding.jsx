@@ -126,25 +126,26 @@ export default function Onboarding({ onProfileChange }) {
 
       {/* Step 4 */}
       <div className="card">
-        <div className="section-label">Step 4 — Upload Chat Exports</div>
+        <div className="section-label">Step 4 — Set Your Business Profile</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 12 }}>
-          Export 3+ WhatsApp chats: <strong style={{ color: 'var(--text)' }}>Settings → Chats → Export Chat → Without Media</strong>.
-          Upload the .txt files to build your persona and populate contact history.
+          Tell the AI who you are — agency name, areas you serve, working hours, and tone.
+          This is what it uses to qualify leads and reply in your voice.
         </p>
         <a href="/persona" className="btn-primary" style={{ display: 'inline-block', borderRadius: 8, padding: '9px 18px', background: 'var(--accent)', color: '#000', fontWeight: 600 }}>
-          Go to Persona Builder →
+          Go to Business Profile →
         </a>
       </div>
 
       {/* Step 5 */}
       <div className="card">
-        <div className="section-label">Step 5 — Share Your Agent Number</div>
+        <div className="section-label">Step 5 — Put Your Number on Your Ads</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
-          Share your agent number with your contacts. You can copy this message:
+          Use your agent number as the contact on your <strong style={{ color: 'var(--text)' }}>Bayut / Property Finder</strong> listings and ads.
+          Every lead who messages it gets qualified instantly — even at 2am.
         </p>
         {status?.numbers && (
           <div style={{ background: '#ffffff08', borderRadius: 8, padding: 12, marginTop: 12, fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text)' }}>
-            Hey! I'm moving to a new WhatsApp number for business: {status.numbers.agent_number?.replace('whatsapp:', '')} — add me there 👍
+            Your agent number: <strong>{status.numbers.agent_number?.replace('whatsapp:', '')}</strong>
           </div>
         )}
       </div>
@@ -153,13 +154,14 @@ export default function Onboarding({ onProfileChange }) {
       <div className="card">
         <div className="section-label">Step 6 — You're Live</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>
-          When someone messages your agent number, you'll get a WhatsApp draft notification on your personal number.
-          Reply <strong style={{ color: 'var(--text)' }}>ok</strong> to send, <strong style={{ color: 'var(--text)' }}>edit [your text]</strong> to change, or <strong style={{ color: 'var(--text)' }}>skip</strong> to dismiss.
+          The AI auto-answers routine questions and qualifies every lead. When a lead wants to
+          negotiate or book a viewing, you get a WhatsApp message — reply <strong style={{ color: 'var(--text)' }}>ok</strong> to send,
+          <strong style={{ color: 'var(--text)' }}> edit [your text]</strong> to change, or <strong style={{ color: 'var(--text)' }}>skip</strong>. Hot leads ping you instantly.
         </p>
         <div style={{ marginTop: 16, padding: 14, background: '#ffffff05', borderRadius: 8, fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 2 }}>
-          ok · ok [name] · edit [text] · skip · skip [name]<br/>
-          summarize [name] · today · catch me up<br/>
-          auto on · auto off · pause · resume
+          ok · edit [text] · skip<br/>
+          hot leads · new leads · leads in [area] · follow ups<br/>
+          summarize [name] · auto on/off · pause · resume
         </div>
       </div>
     </div>

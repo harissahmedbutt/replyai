@@ -15,9 +15,9 @@ export default function Layout({ children }) {
       <aside className="sidebar">
         <div className="sidebar-logo">ReplyAI</div>
         <nav>
-          <NavLink to="/">💬 Dashboard</NavLink>
-          <NavLink to="/contacts">👥 Contacts</NavLink>
-          <NavLink to="/persona">🧠 Persona</NavLink>
+          <NavLink to="/">📊 Pipeline</NavLink>
+          <NavLink to="/contacts">👥 Leads</NavLink>
+          <NavLink to="/persona">🏢 Business Profile</NavLink>
           <NavLink to="/settings">⚙️ Settings</NavLink>
           <NavLink to="/onboarding">🔌 Setup</NavLink>
         </nav>

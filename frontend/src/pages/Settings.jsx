@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { api } from '../supabase.js'
 
 const TOGGLES = [
-  { key: 'active', label: 'Agent Active', desc: 'Master switch — turn off to pause all processing' },
-  { key: 'auto_reply', label: 'Auto-Reply', desc: 'Reply immediately without asking you first' },
-  { key: 'reply_groups', label: 'Reply to Groups', desc: 'Handle group chat messages (off by default)' },
-  { key: 'reply_unknown', label: 'Reply to Unknown Contacts', desc: 'Handle messages from numbers not in your contacts' },
+  { key: 'active', label: 'Agent Active', desc: 'Master switch — turn off to pause all lead handling' },
+  { key: 'auto_reply', label: 'Auto-answer routine questions', desc: 'On: the AI instantly answers routine/qualifying messages and only escalates negotiation & viewings. Off: every reply is drafted for your approval first.' },
 ]
 
 export default function Settings() {
@@ -79,14 +77,16 @@ export default function Settings() {
         </p>
         <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', lineHeight: 2.2, color: 'var(--muted)' }}>
           {[
-            ['ok', 'Send the latest pending draft'],
-            ['ok [name]', 'Send draft for a specific contact'],
+            ['ok', 'Send the latest escalated draft to the lead'],
+            ['ok [name]', 'Send the draft for a specific lead'],
             ['edit [text]', 'Replace the draft with your text and send'],
-            ['skip', 'Dismiss the latest pending draft'],
-            ['summarize [name]', 'Get a full summary of your relationship with someone'],
-            ['today', 'See who messaged you today'],
-            ['catch me up', 'List all pending conversations'],
-            ['auto on / auto off', 'Toggle auto-reply'],
+            ['skip', 'Dismiss the latest draft'],
+            ['hot leads', 'List your hot leads'],
+            ['new leads / today', "Leads that came in today"],
+            ['leads in [area]', 'Leads interested in an area, e.g. leads in JVC'],
+            ['follow ups', 'Leads still being qualified'],
+            ['summarize [name]', 'Full summary of a lead + best next action'],
+            ['auto on / auto off', 'Toggle approve-everything mode'],
             ['pause / resume', 'Stop or restart the agent'],
           ].map(([cmd, desc]) => (
             <div key={cmd} style={{ display: 'flex', gap: 20 }}>

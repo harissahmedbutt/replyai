@@ -135,6 +135,36 @@ export const db = {
     return data
   },
 
+  // Leads (contacts + qualification, for the pipeline)
+  async getLeads(userId, filters = {}) {
+    let q = supabase.from('contacts').select('*').eq('user_id', userId)
+    if (filters.stage) q = q.eq('stage', filters.stage)
+    if (filters.score) q = q.eq('score', filters.score)
+    const { data } = await q.order('last_message_at', { ascending: false })
+    let rows = data || []
+    if (filters.area) {
+      const needle = filters.area.toLowerCase()
+      rows = rows.filter(r => (r.areas || []).some(a => a.toLowerCase().includes(needle) || needle.includes(a.toLowerCase())))
+    }
+    return rows
+  },
+  async getLeadById(userId, id) {
+    const { data } = await supabase.from('contacts').select('*').eq('user_id', userId).eq('id', id).single()
+    return data
+  },
+
+  // Agency / business profile
+  async getAgency(userId) {
+    const { data } = await supabase.from('agency_profile').select('*').eq('user_id', userId).single()
+    return data
+  },
+  async saveAgency(userId, fields) {
+    const { data } = await supabase.from('agency_profile').upsert({
+      user_id: userId, ...fields, updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' }).select().single()
+    return data
+  },
+
   // Persona
   async getPersona(userId) {
     const { data } = await supabase.from('personas').select('*').eq('user_id', userId).single()
@@ -150,7 +180,8 @@ export const db = {
   // Settings
   async getSettings(userId) {
     const { data } = await supabase.from('settings').select('*').eq('user_id', userId).single()
-    return data || { auto_reply: false, reply_groups: false, reply_unknown: true, active: true, draft_expiry_mins: 30 }
+    // auto_reply = "auto-answer routine" mode; default ON (escalations still go to the agent)
+    return data || { auto_reply: true, reply_groups: false, reply_unknown: true, active: true, draft_expiry_mins: 30 }
   },
   async updateSettings(userId, updates) {
     const { data } = await supabase.from('settings').upsert({ user_id: userId, ...updates }).select().single()

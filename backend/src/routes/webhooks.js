@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { db } from '../db.js'
-import { generateDraft, handleQuery } from '../services/agent.js'
-import { sendWhatsApp, sendDraftNotification, sendControl } from '../services/twilio.js'
+import { qualifyAndReply, handleQuery } from '../services/agent.js'
+import { sendWhatsApp, sendDraftNotification, sendControl, sendLeadAlert } from '../services/twilio.js'
 import { enqueue } from '../services/queue.js'
 
 const router = Router()
@@ -72,21 +72,47 @@ async function handleAgentMessage(waRecord, fromNumber, body, messageSid) {
 
   const queueKey = `${user.id}:${contact.id}`
   enqueue(queueKey, async () => {
-    const draft = await generateDraft(user.id, contact, body)
-    const savedDraft = await db.saveDraft(user.id, contact.id, draft)
+    // Re-fetch the lead so we carry forward already-extracted fields
+    const lead = await db.getContactById(contact.id)
+    const result = await qualifyAndReply(user.id, lead, body)
 
-    if (settings.auto_reply) {
-      await sendWhatsApp(fromNumber, waRecord.agent_number, draft)
-      await db.saveMessage(user.id, contact.id, 'outbound', draft, null)
-      await db.updateDraftStatus(savedDraft.id, 'sent')
-    } else {
+    // Merge the newly extracted qualification fields into the lead
+    const updates = {
+      intent: result.intent,
+      budget_min: result.budget_min,
+      budget_max: result.budget_max,
+      areas: result.areas || [],
+      bedrooms: result.bedrooms && result.bedrooms !== 'unknown' ? result.bedrooms : null,
+      timeline: result.timeline,
+      purpose: result.purpose,
+      stage: result.stage,
+      score: result.score
+    }
+    await db.updateContact(lead.id, updates)
+
+    // settings.auto_reply = "auto-answer routine" mode (the default autonomy).
+    // When off, the agent wants to approve EVERY message → escalate all.
+    const escalate = result.escalate || !settings.auto_reply
+
+    if (escalate) {
+      // Draft the suggested reply for the agent to approve / edit / skip
+      await db.saveDraft(user.id, lead.id, result.reply)
       await sendDraftNotification(
         waRecord.control_number,
         user.personal_wa_number,
-        contact.display_name,
+        lead.display_name,
         body,
-        draft
+        result.reply
       )
+    } else {
+      // Routine → auto-send the reply to the lead immediately
+      await sendWhatsApp(fromNumber, waRecord.agent_number, result.reply)
+      await db.saveMessage(user.id, lead.id, 'outbound', result.reply, null)
+    }
+
+    // Fire a hot-lead alert the moment a lead turns hot (cold/warm → hot)
+    if (result.score === 'hot' && lead.score !== 'hot') {
+      await sendLeadAlert(waRecord.control_number, user.personal_wa_number, { ...lead, ...updates, display_name: lead.display_name })
     }
   })
 }
