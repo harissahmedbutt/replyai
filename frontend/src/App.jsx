@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase, api } from './supabase.js'
 import Layout from './components/Layout.jsx'
+import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Onboarding from './pages/Onboarding.jsx'
 import Dashboard from './pages/Dashboard.jsx'
@@ -40,7 +41,9 @@ export default function App() {
     return (
       <BrowserRouter>
         <Routes>
-          <Route path="*" element={<Login />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     )
