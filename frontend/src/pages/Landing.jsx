@@ -70,13 +70,14 @@ const STEPS = [
   { n: '3', title: 'Watch the pipeline fill', body: 'Leads message, the AI qualifies and scores them, and you approve the judgment calls. Done.' }
 ]
 
+// variant cycles the green-led Clay palette; no two adjacent cards repeat.
 const FEATURES = [
-  { title: 'Instant lead qualification', body: 'Every lead is greeted in seconds and qualified for intent, area, budget in AED, bedrooms, and timeline — over a natural conversation.' },
-  { title: 'Auto-answer + escalate', body: 'Routine questions are answered automatically 24/7. Negotiation and viewing requests are routed to you to approve — reply ok, edit, or skip.' },
-  { title: 'Hot-lead alerts', body: 'The moment a lead turns hot, you get pinged on WhatsApp — so you never let a serious buyer go cold while showing a property.' },
-  { title: 'Lead pipeline', body: 'Every lead tracked from new to qualifying, qualified, viewing, and negotiating — scored hot, warm, or cold automatically.' },
-  { title: 'Ask from WhatsApp', body: '“Hot leads”, “new leads”, “leads in Marina”, “summarize Sarah” — query your whole pipeline without opening the dashboard.' },
-  { title: 'Replies in your voice', body: 'Set your agency, areas, hours, and tone once. The AI answers exactly the way you would — never off-brand.' }
+  { variant: 'green', title: 'Instant lead qualification', body: 'Every lead is greeted in seconds and qualified for intent, area, budget in AED, bedrooms, and timeline — over a natural conversation.' },
+  { variant: 'cream', title: 'Auto-answer + escalate', body: 'Routine questions are answered automatically 24/7. Negotiation and viewing requests are routed to you to approve — reply ok, edit, or skip.' },
+  { variant: 'ochre', title: 'Hot-lead alerts', body: 'The moment a lead turns hot, you get pinged on WhatsApp — so you never let a serious buyer go cold while showing a property.' },
+  { variant: 'teal', title: 'Lead pipeline', body: 'Every lead tracked from new to qualifying, qualified, viewing, and negotiating — scored hot, warm, or cold automatically.' },
+  { variant: 'peach', title: 'Ask from WhatsApp', body: '“Hot leads”, “new leads”, “leads in Marina”, “summarize Sarah” — query your whole pipeline without opening the dashboard.' },
+  { variant: 'lavender', title: 'Replies in your voice', body: 'Set your agency, areas, hours, and tone once. The AI answers exactly the way you would — never off-brand.' }
 ]
 
 const COMMANDS = [
@@ -270,7 +271,7 @@ export default function Landing() {
           </div>
           <div className="lp-features">
             {FEATURES.map(f => (
-              <div key={f.title} className="lp-feature">
+              <div key={f.title} className={`lp-feature lp-feature--${f.variant}`}>
                 <h3>{f.title}</h3>
                 <p>{f.body}</p>
               </div>

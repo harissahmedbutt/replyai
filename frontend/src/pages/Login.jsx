@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { supabase } from '../supabase.js'
+import './Landing.css'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -36,10 +37,10 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div className="lp lp-auth">
       <div style={{ width: '100%', maxWidth: 380 }}>
-        <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--accent)', marginBottom: 8 }}>ReplyAI</div>
-        <div style={{ color: 'var(--muted)', marginBottom: 32, fontSize: '0.9rem' }}>Your WhatsApp AI agent</div>
+        <div style={{ fontSize: '1.9rem', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--lp-green-strong)', marginBottom: 8 }}>ReplyAI</div>
+        <div style={{ color: 'var(--lp-muted)', marginBottom: 32, fontSize: '0.9rem' }}>Your WhatsApp AI agent</div>
 
         {msg && <div className={`alert alert-${msg.type}`}>{msg.text}</div>}
 
