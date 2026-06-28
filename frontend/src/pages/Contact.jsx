@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../supabase.js'
+import { SCORE_COLOR } from './Dashboard.jsx'
+import { Icon } from '../components/icons.jsx'
 
-const SCORE_COLOR = { hot: '#ff4d4f', warm: '#faad14', cold: '#8c8c8c' }
 const STAGES = ['new', 'qualifying', 'qualified', 'viewing', 'negotiating', 'won', 'lost']
 
 function fmtBudget(l) {
@@ -67,12 +68,12 @@ export default function Contact() {
       <button className="btn-ghost" onClick={() => navigate('/contacts')} style={{ marginBottom: 20, fontSize: '0.82rem' }}>← Back to leads</button>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-        <div className="avatar" style={{ width: 52, height: 52, fontSize: '1.3rem', background: SCORE_COLOR[lead.score] || '#8c8c8c' }}>
+        <div className="avatar" style={{ width: 52, height: 52, fontSize: '1.3rem', background: SCORE_COLOR[lead.score] || '#8b909a' }}>
           {(lead.display_name || '?')[0].toUpperCase()}
         </div>
         <div>
           <div className="page-title" style={{ marginBottom: 0 }}>
-            {lead.display_name} {lead.score === 'hot' && '🔥'}
+            {lead.display_name} {lead.score === 'hot' && <Icon name="flame" size={20} fill="#e5484d" style={{ verticalAlign: '-2px' }} />}
           </div>
           <div style={{ color: 'var(--muted)', fontSize: '0.82rem' }}>{lead.wa_id} · score: {lead.score || 'cold'}</div>
         </div>
@@ -87,8 +88,9 @@ export default function Contact() {
           {STAGES.map(s => (
             <button key={s} onClick={() => changeStage(s)} className="btn-ghost"
               style={{ padding: '6px 12px', borderRadius: 16, fontSize: '0.78rem', textTransform: 'capitalize',
-                background: (lead.stage || 'new') === s ? 'var(--accent)' : 'transparent',
-                color: (lead.stage || 'new') === s ? '#000' : 'var(--muted)' }}>
+                background: (lead.stage || 'new') === s ? 'var(--accent)' : 'var(--surface)',
+                borderColor: (lead.stage || 'new') === s ? 'var(--accent)' : 'var(--border)',
+                color: (lead.stage || 'new') === s ? '#fff' : 'var(--text-2)' }}>
               {s}
             </button>
           ))}
@@ -112,8 +114,8 @@ export default function Contact() {
       <div className="card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <div className="section-label" style={{ marginBottom: 0 }}>AI Summary</div>
-          <button className="btn-ghost" style={{ fontSize: '0.78rem', padding: '5px 12px' }} onClick={buildSummary} disabled={summarizing}>
-            {summarizing ? 'Building...' : '↻ Rebuild'}
+          <button className="btn-ghost" style={{ fontSize: '0.78rem', padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={buildSummary} disabled={summarizing}>
+            {summarizing ? 'Building...' : <><Icon name="refresh" size={13} />Rebuild</>}
           </button>
         </div>
         <p style={{ color: lead.profile_summary ? 'var(--text)' : 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.7 }}>

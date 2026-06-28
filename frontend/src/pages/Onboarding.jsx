@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../supabase.js'
+import { Icon } from '../components/icons.jsx'
+
+function SavedTag({ children }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--accent-strong)', fontWeight: 600, marginBottom: 12 }}>
+      <Icon name="check" size={16} />{children}
+    </div>
+  )
+}
 
 export default function Onboarding({ onProfileChange }) {
   const [status, setStatus] = useState(null)
@@ -23,7 +32,7 @@ export default function Onboarding({ onProfileChange }) {
       })
       await loadStatus()
       onProfileChange && onProfileChange()
-      setMsg({ type: 'green', text: '✅ WhatsApp number saved.' })
+      setMsg({ type: 'green', text: 'WhatsApp number saved.' })
     } catch (e) {
       setMsg({ type: 'red', text: e.message })
     }
@@ -35,7 +44,7 @@ export default function Onboarding({ onProfileChange }) {
     try {
       const res = await api('/onboarding/provision', { method: 'POST' })
       setStatus({ ...status, hasNumbers: true, numbers: res.numbers })
-      setMsg({ type: 'green', text: '✅ Numbers provisioned! Check your WhatsApp for a welcome message.' })
+      setMsg({ type: 'green', text: 'Numbers provisioned! Check your WhatsApp for a welcome message.' })
     } catch (e) {
       setMsg({ type: 'red', text: e.message })
     }
@@ -56,7 +65,7 @@ export default function Onboarding({ onProfileChange }) {
         <div className="section-label">Step 1 — Your WhatsApp Number</div>
         {status?.hasPersonalNumber ? (
           <div>
-            <div style={{ color: 'var(--accent)', fontWeight: 600, marginBottom: 8 }}>✅ Number saved</div>
+            <SavedTag>Number saved</SavedTag>
             <div className="number-box">{status.personalNumber}</div>
             <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: 8 }}>
               This is where you'll receive draft notifications and reply <strong style={{ color: 'var(--text)' }}>ok / edit / skip</strong>.
@@ -90,7 +99,7 @@ export default function Onboarding({ onProfileChange }) {
         <div className="section-label">Step 2 — Get Your Numbers</div>
         {status?.hasNumbers ? (
           <div>
-            <div style={{ color: 'var(--accent)', fontWeight: 600, marginBottom: 12 }}>✅ Numbers active</div>
+            <SavedTag>Numbers active</SavedTag>
             <div style={{ marginBottom: 8 }}>
               <div style={{ color: 'var(--muted)', fontSize: '0.8rem', marginBottom: 4 }}>Agent number (share with contacts)</div>
               <div className="number-box">{status.numbers?.agent_number?.replace('whatsapp:', '')}</div>
@@ -105,8 +114,8 @@ export default function Onboarding({ onProfileChange }) {
             <p style={{ color: 'var(--muted)', marginBottom: 16, fontSize: '0.9rem' }}>
               We'll provision two WhatsApp Business numbers for you instantly — one for your contacts to message, one for your private control interface.
             </p>
-            <button className="btn-primary" onClick={provision} disabled={provisioning || !status?.hasPersonalNumber}>
-              {provisioning ? 'Provisioning...' : '🚀 Provision My Numbers'}
+            <button className="btn-primary" onClick={provision} disabled={provisioning || !status?.hasPersonalNumber} style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+              {provisioning ? 'Provisioning...' : <><Icon name="rocket" size={15} />Provision My Numbers</>}
             </button>
             {!status?.hasPersonalNumber && (
               <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: 8 }}>Save your WhatsApp number first.</p>
@@ -131,7 +140,7 @@ export default function Onboarding({ onProfileChange }) {
           Tell the AI who you are — agency name, areas you serve, working hours, and tone.
           This is what it uses to qualify leads and reply in your voice.
         </p>
-        <a href="/persona" className="btn-primary" style={{ display: 'inline-block', borderRadius: 8, padding: '9px 18px', background: 'var(--accent)', color: '#000', fontWeight: 600 }}>
+        <a href="/persona" className="btn-primary" style={{ display: 'inline-block', borderRadius: 8, padding: '9px 18px', background: 'var(--accent)', color: '#fff', fontWeight: 600 }}>
           Go to Business Profile →
         </a>
       </div>
@@ -144,7 +153,7 @@ export default function Onboarding({ onProfileChange }) {
           Every lead who messages it gets qualified instantly — even at 2am.
         </p>
         {status?.numbers && (
-          <div style={{ background: '#ffffff08', borderRadius: 8, padding: 12, marginTop: 12, fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text)' }}>
+          <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: 12, marginTop: 12, fontSize: '0.85rem', lineHeight: 1.7, color: 'var(--text)' }}>
             Your agent number: <strong>{status.numbers.agent_number?.replace('whatsapp:', '')}</strong>
           </div>
         )}
@@ -158,7 +167,7 @@ export default function Onboarding({ onProfileChange }) {
           negotiate or book a viewing, you get a WhatsApp message — reply <strong style={{ color: 'var(--text)' }}>ok</strong> to send,
           <strong style={{ color: 'var(--text)' }}> edit [your text]</strong> to change, or <strong style={{ color: 'var(--text)' }}>skip</strong>. Hot leads ping you instantly.
         </p>
-        <div style={{ marginTop: 16, padding: 14, background: '#ffffff05', borderRadius: 8, fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 2 }}>
+        <div style={{ marginTop: 16, padding: 14, background: 'var(--surface-2)', borderRadius: 8, fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-2)', lineHeight: 2 }}>
           ok · edit [text] · skip<br/>
           hot leads · new leads · leads in [area] · follow ups<br/>
           summarize [name] · auto on/off · pause · resume

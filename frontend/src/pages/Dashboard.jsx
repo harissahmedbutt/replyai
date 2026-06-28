@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../supabase.js'
 import { useNavigate } from 'react-router-dom'
+import { Icon } from '../components/icons.jsx'
 
 const STAGES = [
   { key: 'new', label: 'New' },
@@ -10,7 +11,7 @@ const STAGES = [
   { key: 'negotiating', label: 'Negotiating' }
 ]
 
-const SCORE_COLOR = { hot: '#ff4d4f', warm: '#faad14', cold: '#8c8c8c' }
+export const SCORE_COLOR = { hot: '#e5484d', warm: '#d98c12', cold: '#8b909a' }
 
 export function leadBadges(l) {
   const bits = []
@@ -39,7 +40,7 @@ export default function Dashboard() {
     try {
       await api(`/messages/drafts/${draft.id}/send`, { method: 'POST' })
       setDrafts(prev => prev.filter(d => d.id !== draft.id))
-      setMsg({ type: 'green', text: `Sent to ${draft.contacts?.display_name} ✅` })
+      setMsg({ type: 'green', text: `Sent to ${draft.contacts?.display_name}` })
     } catch (e) { setMsg({ type: 'red', text: e.message }) }
   }
   const dismissDraft = async (draft) => {
@@ -63,7 +64,7 @@ export default function Dashboard() {
       {msg && <div className={`alert alert-${msg.type}`} onClick={() => setMsg(null)} style={{ cursor: 'pointer' }}>{msg.text}</div>}
 
       <div className="stats">
-        <div className="stat"><div className="stat-value" style={{ color: '#ff4d4f' }}>{hot.length}</div><div className="stat-label">🔥 Hot Leads</div></div>
+        <div className="stat"><div className="stat-value" style={{ color: '#e5484d' }}>{hot.length}</div><div className="stat-label" style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="flame" size={12} fill="#e5484d" />Hot Leads</div></div>
         <div className="stat"><div className="stat-value">{qualified.length}</div><div className="stat-label">Qualified+</div></div>
         <div className="stat"><div className="stat-value">{today.length}</div><div className="stat-label">Active Today</div></div>
         <div className="stat"><div className="stat-value">{leads.length}</div><div className="stat-label">Total Leads</div></div>
@@ -72,7 +73,7 @@ export default function Dashboard() {
       {/* Needs you — escalated drafts awaiting approval */}
       {drafts.length > 0 && (
         <div>
-          <div className="section-label">⚡ Needs You — {drafts.length} to approve</div>
+          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="bolt" size={13} fill="var(--yellow)" />Needs You — {drafts.length} to approve</div>
           {drafts.map(draft => (
             <DraftCard key={draft.id} draft={draft} onSend={sendDraft} onDismiss={dismissDraft} />
           ))}
@@ -83,7 +84,7 @@ export default function Dashboard() {
       <div className="section-label" style={{ marginTop: drafts.length ? 24 : 0 }}>Pipeline</div>
       {leads.length === 0 ? (
         <div className="empty">
-          <div className="empty-icon">📊</div>
+          <div className="empty-icon"><Icon name="inbox" size={40} color="var(--muted)" strokeWidth={1.4} /></div>
           <div className="empty-title">No leads yet</div>
           <p>Put your agent number on your Bayut / Property Finder ads. Leads who message it will appear here, qualified.</p>
           <br />
@@ -103,13 +104,13 @@ export default function Dashboard() {
                   const badges = leadBadges(l)
                   return (
                     <div key={l.id} className="contact-row" onClick={() => navigate(`/contacts/${l.id}`)}>
-                      <div className="avatar" style={{ background: SCORE_COLOR[l.score] || '#8c8c8c' }}>
+                      <div className="avatar" style={{ background: SCORE_COLOR[l.score] || '#8b909a' }}>
                         {(l.display_name || '?')[0].toUpperCase()}
                       </div>
                       <div className="contact-info">
                         <div className="contact-name">
                           {l.display_name}
-                          {l.score === 'hot' && <span style={{ marginLeft: 6 }}>🔥</span>}
+                          {l.score === 'hot' && <Icon name="flame" size={13} fill="#e5484d" style={{ marginLeft: 6, verticalAlign: '-2px' }} />}
                         </div>
                         <div className="contact-preview">{badges.length ? badges.join(' · ') : 'Qualifying…'}</div>
                       </div>
@@ -149,8 +150,12 @@ function DraftCard({ draft, onSend, onDismiss }) {
         <div className="draft-text">{draft.draft_text}</div>
       )}
       <div className="draft-actions">
-        <button className="btn-primary" onClick={handleSend} disabled={sending}>{sending ? 'Sending...' : '✅ Send'}</button>
-        <button className="btn-ghost" onClick={() => setEditing(!editing)}>{editing ? 'Cancel' : '✏️ Edit'}</button>
+        <button className="btn-primary" onClick={handleSend} disabled={sending} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          {sending ? 'Sending...' : <><Icon name="check" size={15} />Send</>}
+        </button>
+        <button className="btn-ghost" onClick={() => setEditing(!editing)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          {editing ? 'Cancel' : <><Icon name="pencil" size={14} />Edit</>}
+        </button>
         <button className="btn-ghost" onClick={() => onDismiss(draft)}>Skip</button>
       </div>
     </div>

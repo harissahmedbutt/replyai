@@ -37,7 +37,7 @@ export default function Persona() {
           areas_served: form.areas_served.split(',').map(s => s.trim()).filter(Boolean)
         })
       })
-      setMsg({ type: 'green', text: '✅ Business profile saved. Your AI now answers in this voice.' })
+      setMsg({ type: 'green', text: 'Business profile saved. Your AI now answers in this voice.' })
     } catch (e) { setMsg({ type: 'red', text: e.message }) }
     setSaving(false)
   }
@@ -87,7 +87,7 @@ export default function Persona() {
         </div>
       </form>
 
-      <div className="card" style={{ background: '#ffffff05' }}>
+      <div className="card" style={{ background: 'var(--surface-2)' }}>
         <div className="section-label">How the AI uses this</div>
         <p style={{ color: 'var(--muted)', fontSize: '0.88rem', lineHeight: 1.7 }}>
           Every incoming lead is greeted in your voice, qualified for intent, area, budget (AED), bedrooms,

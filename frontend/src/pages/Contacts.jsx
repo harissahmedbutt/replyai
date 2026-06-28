@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../supabase.js'
-import { leadBadges } from './Dashboard.jsx'
+import { leadBadges, SCORE_COLOR } from './Dashboard.jsx'
+import { Icon } from '../components/icons.jsx'
 
-const SCORE_COLOR = { hot: '#ff4d4f', warm: '#faad14', cold: '#8c8c8c' }
 const FILTERS = [
   { key: 'all', label: 'All' },
-  { key: 'hot', label: '🔥 Hot' },
+  { key: 'hot', label: 'Hot' },
   { key: 'qualified', label: 'Qualified' },
   { key: 'new', label: 'New' }
 ]
@@ -35,9 +35,11 @@ export default function Contacts() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         {FILTERS.map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)} className="btn-ghost"
-            style={{ padding: '6px 14px', borderRadius: 20, fontSize: '0.82rem',
-              background: filter === f.key ? 'var(--accent)' : 'transparent',
-              color: filter === f.key ? '#000' : 'var(--muted)' }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 20, fontSize: '0.82rem',
+              background: filter === f.key ? 'var(--accent)' : 'var(--surface)',
+              borderColor: filter === f.key ? 'var(--accent)' : 'var(--border)',
+              color: filter === f.key ? '#fff' : 'var(--text-2)' }}>
+            {f.key === 'hot' && <Icon name="flame" size={12} fill={filter === f.key ? '#fff' : '#e5484d'} />}
             {f.label}
           </button>
         ))}
@@ -49,7 +51,7 @@ export default function Contacts() {
 
       {filtered.length === 0 ? (
         <div className="empty">
-          <div className="empty-icon">👥</div>
+          <div className="empty-icon"><Icon name="users" size={40} color="var(--muted)" strokeWidth={1.4} /></div>
           <div className="empty-title">No leads here</div>
           <p>Leads appear when people message your agent number.</p>
         </div>
@@ -59,12 +61,12 @@ export default function Contacts() {
             const badges = leadBadges(l)
             return (
               <div key={l.id} className="contact-row" onClick={() => navigate(`/contacts/${l.id}`)}>
-                <div className="avatar" style={{ background: SCORE_COLOR[l.score] || '#8c8c8c' }}>
+                <div className="avatar" style={{ background: SCORE_COLOR[l.score] || '#8b909a' }}>
                   {(l.display_name || '?')[0].toUpperCase()}
                 </div>
                 <div className="contact-info">
                   <div className="contact-name">
-                    {l.display_name}{l.score === 'hot' && <span style={{ marginLeft: 6 }}>🔥</span>}
+                    {l.display_name}{l.score === 'hot' && <Icon name="flame" size={13} fill="#e5484d" style={{ marginLeft: 6, verticalAlign: '-2px' }} />}
                   </div>
                   <div className="contact-preview">{badges.length ? badges.join(' · ') : 'Qualifying…'}</div>
                 </div>
